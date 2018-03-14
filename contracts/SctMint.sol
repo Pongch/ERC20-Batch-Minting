@@ -5,5 +5,5 @@ import 'zeppelin-solidity/contracts/token/ERC20/MintableToken.sol';
 contract SctMint is MintableToken {
   string public name = "SCT Mint";
   string public symbol = "SCTM";
-  uint8 public decimals = 18;
+  uint8 public decimals = 0;
 }
