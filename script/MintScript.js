@@ -1,8 +1,8 @@
 
 //JSON of the token amount and token addresses
-//run with command: truffle exec MintScript.js
+//run with command: truffle exec ./script/MintScript.js
 const SctMint = artifacts.require('SctMint');
-const icoRecipient = require('../icoRecipient/icoRecipient.js');
+const IcoRecipient = require('../icoRecipient/icoRecipient.js');
 
 module.exports = function(callback) {
   for (let [address, amount] of Object.entries(IcoRecipient)) {

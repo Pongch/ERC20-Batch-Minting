@@ -2,17 +2,18 @@
 * TEST COVERAGE
 * Test is done on Ganache CLI
 * the contract should:
+*
 * x 1) Have a correct symbol
 * x 2) Have a correct public name
 * x 3) Have a correct decimal place
 * x 5) should mint the right amount
 * 6) Unable to mint more, after the stopMinting function is called
-* 7) Be transferrable by owner after minted
+* x 7) Be transferrable by owner after minted
 * 8) Show the transfer event
 * x 9) Have the right balance after minted
 * x 10) Set owner as sender
 * x 11) only owner can && other account cannot CALL MINT function
-* 12) test approval function
+* 12) test approval & transferFrom
 * 13) owner can call finish minting function
 * 14) Check for total supply
 * 15) How it handles random ETH sending (223 fallback feature)
@@ -85,6 +86,28 @@ contract('SctMint', async (accounts) => {
     assert.equal(amount, accountBalance, "Amount of minted token doesn't match")
   })
 
+  it('should be transferable', async() => {
+    let instance = await SctMint.deployed();
+    let ownerAccount = web3.eth.accounts[0];
+    let recipientAccount = web3.eth.accounts[5];
+    let recipientAccount2 = web3.eth.accounts[6];
+
+    let amount = 100;
+    //owner mint new coin to recipient
+    await instance.mint(recipientAccount, amount);
+
+    //recipient transfer to another account
+    await instance.transfer(recipientAccount2, amount, {from: recipientAccount});
+
+    //check balances
+    let recipient = await instance.balanceOf.call(recipientAccount);
+    let recipient2 = await instance.balanceOf.call(recipientAccount2);
+
+    assert.equal(recipient.toNumber(), 0, "recipient did not send token");
+    assert.equal(recipient2.toNumber(), 100, "recipient account is not 0");
+  })
+
+
   it('should not allow non-owner to call finishMinting', async () => {
     let instance = await SctMint.deployed();
     let nonOwner = web3.eth.accounts[1];
@@ -115,6 +138,5 @@ contract('SctMint', async (accounts) => {
     //Balance should not change
     assert.equal(balanceBefore, balanceAfter, 'minting still possible')
   })
-
 
 })

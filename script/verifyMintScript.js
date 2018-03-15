@@ -1,7 +1,7 @@
 
 //JSON of the token amount and token addresses
 const SctMint = artifacts.require('SctMint');
-const icoRecipient = require('../icoRecipient/icoRecipient.js');
+const IcoRecipient = require('../icoRecipient/icoRecipient.js');
 
 module.exports = function(callback) {
   for (let [address, amount] of Object.entries(IcoRecipient)) {
