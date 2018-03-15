@@ -7,15 +7,16 @@
 * x 3) Have a correct decimal place
 * x 5) should mint the right amount
 * 6) Unable to mint more, after the stopMinting function is called
-* 7) Be transferrable after minted by other accounts
+* 7) Be transferrable by owner after minted
 * 8) Show the transfer event
 * x 9) Have the right balance after minted
 * x 10) Set owner as sender
-* 11) other account cannot call mint function
+* x 11) only owner can && other account cannot CALL MINT function
 * 12) test approval function
-* 13) only owner can call finish minting function
+* 13) owner can call finish minting function
 * 14) Check for total supply
 * 15) How it handles random ETH sending (223 fallback feature)
+* x 16) Other people cannot call finish minting function
 */
 
 import expectThrow from 'zeppelin-solidity/test/helpers/expectThrow.js';
@@ -82,6 +83,37 @@ contract('SctMint', async (accounts) => {
     let accountBalance = checkAmountAfterMint.toNumber();
 
     assert.equal(amount, accountBalance, "Amount of minted token doesn't match")
+  })
+
+  it('should not allow non-owner to call finishMinting', async () => {
+    let instance = await SctMint.deployed();
+    let nonOwner = web3.eth.accounts[1];
+
+    //should throw
+    await expectThrow(instance.finishMinting({from: nonOwner}));
+  })
+
+  it('should not allow minting after calling FinishMinting', async () => {
+    let instance = await SctMint.deployed();
+    let ownerAccount = web3.eth.accounts[0];
+
+    let amount = 100;
+    //owner can still mint
+    await instance.mint(ownerAccount, amount, {from: ownerAccount});
+    //check if minting works
+    let checkAmountAfterMint = await instance.balanceOf(ownerAccount);
+    let balanceBefore = checkAmountAfterMint.toNumber();
+
+    //call finish minting function
+    await instance.finishMinting();
+    //try minting, expecting throw
+    await expectThrow(instance.mint(ownerAccount, amount, {from: ownerAccount}));
+    //check amount after minting and calling finishminting
+    let checkAmountAfterFinishMinting = await instance.balanceOf(ownerAccount)
+    let balanceAfter = checkAmountAfterFinishMinting.toNumber();
+
+    //Balance should not change
+    assert.equal(balanceBefore, balanceAfter, 'minting still possible')
   })
 
 
